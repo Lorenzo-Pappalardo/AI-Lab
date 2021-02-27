@@ -9,14 +9,19 @@ def read_csv() -> DataFrame:
 
 
 def get_mode_stats(df):
-    modes = df.mode()
-    modes_values = modes.to_numpy()[0]
-
     res = []
     for index, column in enumerate(df):
-        frequency = df[column].str.contains(modes_values[index]).sum()
-        res.append({'mode': column, 'frequency': frequency,
-                    'percentage': (frequency / len(df)) * 100})
+        frequencies = df[column].value_counts()
+        res.append(
+            {
+                'column': column,
+                'first_mode': frequencies.index[0],
+                'fm_frequency': frequencies[0],
+                'fm_percentage': (frequencies[0] / len(df)) * 100,
+                'second_mode': frequencies.index[1],
+                'sm_frequency': frequencies[1],
+                'sm_percentage': (frequencies[1] / len(df)) * 100
+            })
     return res
 
 
@@ -46,8 +51,7 @@ def main() -> None:
         'total_number_of_values': len(categoricals_df),
         'percentage_of_missing_values': 100-(categoricals_stats.loc['count']/len(categoricals_df))*100,
         'cardinality': categoricals_df.nunique(),
-        'mode': categoricals_df.mode(),
-        'mode_frequencies_percentages': get_mode_stats(categoricals_df)
+        'modes': get_mode_stats(categoricals_df)
     }
 
     print(numerics, end='\n\n')
